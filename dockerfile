@@ -28,7 +28,9 @@ RUN  apt-get install -y --no-install-recommends \
       libtelldus-core2
 
 RUN apt-get download telldus-core 
-RUN dpkg --ignore-depends=libconfuse0 -i telldus-core_2.1.2-1_amd64.deb 
+RUN dpkg -i libconfuse-common_3.2+really3.0+dfsg-1_all.deb && \
+    dpkg -i libconfuse1_3.2+really3.0+dfsg-1_amd64.deb* && \
+    dpkg --ignore-depends=libconfuse0 -i telldus-core_2.1.2-1_amd64.deb
 RUN sed -i 's/\(Depends:.*\)libconfuse0[^,]*/\1libconfuse1 (>= 3.0)/' /var/lib/dpkg/status 
 RUN ln -s /usr/lib/x86_64-linux-gnu/libconfuse.so.1 /usr/lib/x86_64-linux-gnu/libconfuse.so.0 
 
