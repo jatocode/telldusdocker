@@ -19,4 +19,6 @@ RUN apt-get update
 # And install
 RUN  apt-get install telldus-core -y
 
+COPY tellstick.conf /etc/tellstick.conf
+
 ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
