@@ -8,5 +8,5 @@ docker run --privileged -it telldusdocker
 
 # Exec
 
-docker exec -it <containerid> tdtool --list
+docker exec -it "containerid" tdtool --list
 
