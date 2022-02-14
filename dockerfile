@@ -22,14 +22,19 @@ RUN apt-get update
 
 # And install
 RUN  apt-get install -y --no-install-recommends \
-      libconfuse-common \
-      libconfuse1 \
+#      libconfuse-common \
+#      libconfuse1 \
       libftdi1 \
       libtelldus-core2
 
 RUN apt-get download telldus-core 
+
+# Laddade ner de här manuellt
+COPY libconfuse-common_3.2+really3.0+dfsg-1_all.deb libconfuse-common_3.2+really3.0+dfsg-1_all.deb
+COPY libconfuse1_3.2+really3.0+dfsg-1_amd64.deb libconfuse1_3.2+really3.0+dfsg-1_amd64.deb
+
 RUN dpkg -i libconfuse-common_3.2+really3.0+dfsg-1_all.deb && \
-    dpkg -i libconfuse1_3.2+really3.0+dfsg-1_amd64.deb* && \
+    dpkg -i libconfuse1_3.2+really3.0+dfsg-1_amd64.deb && \
     dpkg --ignore-depends=libconfuse0 -i telldus-core_2.1.2-1_amd64.deb
 RUN sed -i 's/\(Depends:.*\)libconfuse0[^,]*/\1libconfuse1 (>= 3.0)/' /var/lib/dpkg/status 
 RUN ln -s /usr/lib/x86_64-linux-gnu/libconfuse.so.1 /usr/lib/x86_64-linux-gnu/libconfuse.so.0 
@@ -39,4 +44,4 @@ RUN apt-get --fix-broken install -y
 RUN apt-mark hold libconfuse1 && apt-mark hold telldus-core
 COPY tellstick.conf /etc/tellstick.conf
 
-ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
+#ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
