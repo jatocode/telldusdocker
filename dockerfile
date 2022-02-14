@@ -44,4 +44,4 @@ RUN apt-get --fix-broken install -y
 RUN apt-mark hold libconfuse1 && apt-mark hold telldus-core
 COPY tellstick.conf /etc/tellstick.conf
 
-#ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
+ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
