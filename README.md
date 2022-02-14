@@ -1,12 +1,12 @@
 # Build
 
-docker build -t telldusdocker .
+> docker build -t telldusdocker .
 
 # Start
 
-docker run --privileged -it telldusdocker
+> docker run --privileged -it telldusdocker
 
 # Exec
 
-docker exec -it "containerid" tdtool --list
+> docker exec -it "containerid" tdtool --list
 
