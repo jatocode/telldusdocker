@@ -9,7 +9,10 @@
 
 # Start
 
-> docker run -v /dev/bus:/dev/bus:ro -d telldusdocker
+Find your device id with lsusb
+> docker run --device=/dev/bus/usb/001/003 -d telldusdocker
+OR more dangerously
+> docker run --privileged -d telldusdocker
 
 # Exec
 
