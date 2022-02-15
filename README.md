@@ -9,7 +9,7 @@
 
 # Start
 
-> docker run --privileged -it telldusdocker
+> docker run -v /dev/bus:/dev/bus:ro -d telldusdocker
 
 # Exec
 
