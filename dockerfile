@@ -15,15 +15,8 @@ RUN echo "deb http://download.telldus.com/debian/ stable main" >> /etc/apt/sourc
 
 RUN apt-get update
 
-# Baserat på:
-# https://forum.telldus.com/viewtopic.php?f=8&t=4&p=49723&hilit=telldus+core+ubuntu&sid=55e6f99e8ed8d235aec93253a25213e6#p49723
-# och
-# https://github.com/sel/telldusd-docker
-
 # And install
 RUN  apt-get install -y --no-install-recommends \
-#      libconfuse-common \
-#      libconfuse1 \
       libftdi1 \
       libtelldus-core2
 
@@ -31,5 +24,5 @@ RUN apt-get install -y telldus-core
 
 COPY tellstick.conf /etc/tellstick.conf
 
-#ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
+ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
 
