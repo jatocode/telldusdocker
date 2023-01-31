@@ -1,0 +1,94 @@
+import { Client } from './deps.ts'
+import PQueue from "https://deno.land/x/p_queue@1.0.1/mod.ts"
+import { IDevice } from './IDevice.ts'
+
+// Expecting config.json with url to mqtt-server
+const config = JSON.parse(await Deno.readTextFile("./config.json"));
+
+const queue = new PQueue({
+    concurrency: 1,
+})
+
+async function main(serverurl: string, topic_in: string = 'tellstick', topic_out:string = 'tellstick/out', tool: string = 'tdtool') {
+
+    console.log(`Listening on ${serverurl}/${topic_in}/#, using ${tool} for exec`)
+
+    const client = new Client({
+        url: serverurl,
+    })
+
+    await client.connect()
+
+    const decoder = new TextDecoder()
+
+    client.on('message', async (topic: string, payload: Uint8Array) => {
+
+        const jsondata = decoder.decode(payload)
+        let data : any;
+        try {
+            data = JSON.parse(jsondata)
+        } catch (e) {
+            console.error('Failed to parse ', jsondata);
+            return;
+        }
+
+        switch (topic) {
+            case topic_in:                
+                // Run shellcommand
+                await queue.add(() => runShellCommand(tool, data.cmd, data.id, topic_out, client));
+                break
+            default:
+                break
+        }
+    });
+    queue.addEventListener("idle", () => console.log("All done, no jobs in queue"))
+    queue.addEventListener("active", () => 
+        console.log(`Running queued cmd. Queue size: ${queue.size}`)
+    )
+
+    await client.subscribe(`${topic_in}/#`)
+}
+
+// Run shellcommand function
+async function runShellCommand(tool: string, cmd: string, id: string, topic_out:string, client: Client): Promise<boolean> {
+    console.log(`Running ${tool} with cmd:${cmd}, on id:${id}`)
+
+    const p = Deno.run({ cmd: [tool, cmd, id], stdout: 'piped', stderr: 'piped' })
+    const { code } = await p.status()
+
+    if (code == 0) {
+        const rawOutput = await p.output()
+        const decoder = new TextDecoder()
+        const output = decoder.decode(rawOutput);
+        if (cmd == '--list') {
+            let devices = await handleListCommand(output);
+            await client.publish(topic_out, JSON.stringify(devices));
+        }
+    } else {
+        console.log(`${tool} exited with code ${code}`)
+        return false;
+    }
+
+    return true;
+}
+
+async function handleListCommand(cmdOutput:string):Promise<IDevice[]> {
+    let devices = [];
+    for (const row of cmdOutput.split('\n')) {
+        let m = row.match(/(\d+)\t(.*)\t(OFF|ON)/);
+        if (m && m.length > 0) {
+            let device:IDevice = {
+                id: m[1],
+                name: m[2],
+                state: m[3] == 'ON'
+            };
+            devices.push(device);
+        }
+    }
+    console.log(devices);
+
+    return devices;
+}
+
+main(config.mqttserver, config.topic_in, config.topic_out, config.toolname)
+

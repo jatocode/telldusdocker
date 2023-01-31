@@ -1,0 +1,6 @@
+{
+    "mqttserver":"mqtt://example.com",
+    "topic_in":"tellstick/in",
+    "topic_out":"tellstick/out",
+    "toolname":"tdtool"
+}
