@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  telldusdocker:
+    image: telldusdocker:latest
+    build: .
+    volumes:
+      - "/home/tobias/projekt/telldusdocker/tellstick.conf:/etc/tellstick.conf"

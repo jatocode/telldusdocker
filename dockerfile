@@ -22,7 +22,5 @@ RUN  apt-get install -y --no-install-recommends \
 
 RUN apt-get install -y telldus-core 
 
-COPY tellstick.conf /etc/tellstick.conf
-
 ENTRYPOINT ["/usr/sbin/telldusd", "--nodaemon"]
 
