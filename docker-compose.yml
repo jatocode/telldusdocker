@@ -4,5 +4,8 @@ services:
   telldusdocker:
     image: telldusdocker:latest
     build: .
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
     volumes:
       - "/home/tobias/projekt/telldusdocker/tellstick.conf:/etc/tellstick.conf"
+    restart: unless-stopped
