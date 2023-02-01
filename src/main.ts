@@ -12,6 +12,7 @@ const queue = new PQueue({
 async function main(serverurl: string, topic_in: string = 'tellstick', topic_out:string = 'tellstick/out', tool: string = 'tdtool') {
 
     console.log(`Listening on ${serverurl}/${topic_in}/#, using ${tool} for exec`)
+    if(config.oldmode) console.log('Backward compatibility/old mode enabled')
 
     const client = new Client({
         url: serverurl,
@@ -23,24 +24,41 @@ async function main(serverurl: string, topic_in: string = 'tellstick', topic_out
 
     client.on('message', async (topic: string, payload: Uint8Array) => {
 
-        const jsondata = decoder.decode(payload)
-        let data : any;
-        try {
-            data = JSON.parse(jsondata)
-        } catch (e) {
-            console.error('Failed to parse ', jsondata);
-            return;
-        }
+        if(config.oldmode) {
+            const jsondata = decoder.decode(payload)
+            let data : any;
+            try {
+                data = JSON.parse(jsondata)
+            } catch (e) {
+                console.error('Failed to parse ', jsondata);
+                return;
+            }
 
-        switch (topic) {
-            case topic_in:                
-                // Run shellcommand
-                await queue.add(() => runShellCommand(tool, data.cmd, data.id, topic_out, client));
-                break
-            default:
-                break
+            switch (topic) {
+                case topic_in:                
+                    // Run shellcommand
+                    await queue.add(() => runShellCommand(tool, data.cmd, data.id, topic_out, client))
+                    break
+                default:
+                    break
+            }
+        } else {
+            // /tellstick/in/1234/on or //tellstick/in/list 
+            if(topic.startsWith(topic_in)) {
+                if(topic.endsWith('/list')) {
+                    await queue.add(() => runShellCommand(tool, '--list', '0', topic_out, client))
+                } else {
+                    const r = topic.split('/')
+                    if(r.length == 4) {
+                        const id = r[2]
+                        const cmd = '--' + r[3]
+                        // Run shellcommand
+                        await queue.add(() => runShellCommand(tool, cmd, id, topic_out, client))
+                    }
+                }
+            }
         }
-    });
+    })
     queue.addEventListener("idle", () => console.log("All done, no jobs in queue"))
     queue.addEventListener("active", () => 
         console.log(`Running queued cmd. Queue size: ${queue.size}`)
@@ -85,7 +103,6 @@ async function handleListCommand(cmdOutput:string):Promise<IDevice[]> {
             devices.push(device);
         }
     }
-    console.log(devices);
 
     return devices;
 }

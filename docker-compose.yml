@@ -2,10 +2,11 @@ version: "3"
 
 services:
   telldusdocker:
-    image: telldusdocker:latest
+    image: cr.taklamakan.se/telldusdocker:2.1 
     build: .
     devices:
       - "/dev/bus/usb:/dev/bus/usb"
     volumes:
       - "/home/tobias/projekt/telldusdocker/tellstick.conf:/etc/tellstick.conf"
+      - "/home/tobias/projekt/telldusdocker/config.json:/app/config.json"
     restart: unless-stopped
