@@ -12,7 +12,6 @@ const queue = new PQueue({
 async function main(serverurl: string, topic_in: string = 'tellstick', topic_out:string = 'tellstick/out', tool: string = 'tdtool') {
 
     console.log(`Listening on ${serverurl}/${topic_in}/#, using ${tool} for exec`)
-    if(config.oldmode) console.log('Backward compatibility/old mode enabled')
 
     const client = new Client({
         url: serverurl,
@@ -24,7 +23,8 @@ async function main(serverurl: string, topic_in: string = 'tellstick', topic_out
 
     client.on('message', async (topic: string, payload: Uint8Array) => {
 
-        if(config.oldmode) {
+        if(payload.length > 0) {
+            // /tellstick/in {"cmd":"--on","id":"1234"}
             const jsondata = decoder.decode(payload)
             let data : any;
             try {
@@ -44,6 +44,7 @@ async function main(serverurl: string, topic_in: string = 'tellstick', topic_out
             }
         } else {
             // /tellstick/in/1234/on or //tellstick/in/list 
+
             if(topic.startsWith(topic_in)) {
                 if(topic.endsWith('/list')) {
                     await queue.add(() => runShellCommand(tool, '--list', '0', topic_out, client))
@@ -59,10 +60,12 @@ async function main(serverurl: string, topic_in: string = 'tellstick', topic_out
             }
         }
     })
-    queue.addEventListener("idle", () => console.log("All done, no jobs in queue"))
-    queue.addEventListener("active", () => 
-        console.log(`Running queued cmd. Queue size: ${queue.size}`)
-    )
+
+    // Debug
+    // queue.addEventListener("idle", () => console.log("All done, no jobs in queue"))
+    // queue.addEventListener("active", () => 
+    //     console.log(`Running queued cmd. Queue size: ${queue.size}`)
+    // )
 
     await client.subscribe(`${topic_in}/#`)
 }
