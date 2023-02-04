@@ -2,7 +2,7 @@ version: "3"
 
 services:
   telldusdocker:
-    image: cr.taklamakan.se/telldusdocker:2.2
+    image: jatodocker/telldusdocker:2.2
     build: .
     devices:
       - "/dev/bus/usb:/dev/bus/usb"
