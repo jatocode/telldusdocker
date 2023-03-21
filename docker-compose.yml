@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  telldusdocker:
+    image: jatodocker/telldusdocker:2.3
+    build: .
+    ports:
+      - "8080:8080"
+      - "1993:1993"
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    volumes:
+      - ./tellstick.conf:/etc/tellstick.conf
+      - ./config.json:/app/config.json
+    restart: unless-stopped
