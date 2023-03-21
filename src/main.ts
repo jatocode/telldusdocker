@@ -1,5 +1,7 @@
 import { Client } from './deps.ts'
 import PQueue from "https://deno.land/x/p_queue@1.0.1/mod.ts"
+import { serve } from "https://deno.land/std@0.180.0/http/server.ts";
+
 import { IDevice } from './IDevice.ts'
 
 // Expecting config.json with url to mqtt-server
@@ -16,6 +18,8 @@ async function main(serverurl: string, topic_in: string = 'tellstick', topic_out
     const client = new Client({
         url: serverurl,
     })
+
+    serve(handler, { port: config.httpport })
 
     await client.connect()
 
@@ -109,6 +113,23 @@ async function handleListCommand(cmdOutput:string):Promise<IDevice[]> {
 
     return devices;
 }
+
+async function handler(req: Request): Promise<Response> {
+    console.log("Method:", req.method);
+  
+    const url = new URL(req.url);
+    console.log("Path:", url.pathname);
+    console.log("Query parameters:", url.searchParams);
+  
+    console.log("Headers:", req.headers);
+  
+    if (req.body) {
+      const body = await req.text();
+      console.log("Body:", body);
+    }
+  
+    return new Response("Hello, World!");
+  }
 
 main(config.mqttserver, config.topic_in, config.topic_out, config.toolname)
 
