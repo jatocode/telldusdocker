@@ -2,11 +2,13 @@ version: "3"
 
 services:
   telldusdocker:
-    image: jatodocker/telldusdocker:2.2
+    image: jatodocker/telldusdocker:3.0
     build: .
     devices:
       - "/dev/bus/usb:/dev/bus/usb"
     volumes:
       - ./tellstick.conf:/etc/tellstick.conf
       - ./config.json:/app/config.json
+    ports:
+      - 3300:8080
     restart: unless-stopped

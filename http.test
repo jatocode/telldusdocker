@@ -1,0 +1,4 @@
+curl localhost:3300/devices
+curl localhost:3300/device/10
+curl -X POST -H "Content-Type: application/json" -d '{"state":true}' http://localhost:3300/device/10
+curl -X POST -H "Content-Type: application/json" -d '{"state":false}' http://localhost:3300/device/10
